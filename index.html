@@ -6,11 +6,14 @@
      * https://developers.google.com/explorer-help/guides/code_samples#javascript
      */
     let people = [];
+    let done = false;
+    let count = 0;
 
     function authenticate() {
+        document.querySelector('#auth').style.display = 'none';
         return gapi.auth2.getAuthInstance()
             .signIn({ scope: "https://www.googleapis.com/auth/directory.readonly" })
-            .then(function () { console.log("Sign-in successful"); },
+            .then(function () { console.log("Sign-in successful"); document.querySelector('#exec').style.visibility = 'visible'; },
                 function (err) { console.error("Error signing in", err); });
     }
     function loadClient() {
@@ -21,6 +24,9 @@
     }
     // Make sure the client is loaded and sign-in is complete before calling this method.
     function execute(nextPage) {
+        count ++;
+        document.querySelector('#status').innerHTML = 'Collecting ' + Math.round((count/26)*100) + '%';
+        document.querySelectorAll('button').forEach(element => element.disabled = true);
         return gapi.client.people.people.listDirectoryPeople({
             "mergeSources": [
                 "DIRECTORY_MERGE_SOURCE_TYPE_CONTACT"
@@ -34,17 +40,20 @@
         })
             .then(function (response) {
                 let result = response.result;
-                execute(result.nextPageToken)
+                if (done == false) {
+                    execute(result.nextPageToken)
+                }
                 people = people.concat(result.people)
-                if (result.nextPageToken == undefined) {
+                if (result.nextPageToken == undefined && done == false) {
                     let peopleOutput = [];
 
                     people.forEach(person => {
-                        print(person);
-                        if (person.emailAddresses.length && person.names.length) {
+                        if (person.hasOwnProperty('emailAddresses') && person.hasOwnProperty('names')) {
                             peopleOutput.push([person.emailAddresses[0].value, person.names[0].unstructuredName]);
                         }
                     });
+
+                    document.querySelector('#status').innerHTML = 'Done';
                     
                     let csvContent = "data:text/csv;charset=utf-8," + peopleOutput.map(e => e.join(",")).join("\n");
                     let encodedUri = encodeURI(csvContent);
@@ -55,6 +64,7 @@
                     document.body.appendChild(link); // Required for FF
                     link.click(); // This will download the data file named "my_data.csv".
                     
+                    done = true;
                     return;
                 }
                 
@@ -66,5 +76,6 @@
         gapi.auth2.init({ client_id: "414634667869-jcpsh7q0lo33kbig005roo20i7d75gss.apps.googleusercontent.com" });
     });
 </script>
-<button onclick="authenticate().then(loadClient)">authorize and load</button>
-<button onclick="execute()">execute</button>
+<button onclick="authenticate().then(loadClient)" id="auth">Authorize</button>
+<button onclick="execute()" id="exec" style="visibility: hidden">Download</button>
+<h3 id="status" style="font-family: Arial, Helvetica, sans-serif"></h3>
