@@ -5,7 +5,7 @@
      * See instructions for running APIs Explorer code samples locally:
      * https://developers.google.com/explorer-help/guides/code_samples#javascript
      */
-    let nextPage = "";
+    let nextPage = undefined;
     let people = [];
 
     function authenticate() {
@@ -36,7 +36,7 @@
             .then(function (response) {
                 let result = response.result;
                 nextPage = response.nextPageToken;
-                people.append(response.people)
+                people.push(response.people)
                 console.log("Response", response.result);
             },
                 function (err) { console.error("Execute error", err); });
