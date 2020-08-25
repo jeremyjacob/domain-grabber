@@ -5,7 +5,6 @@
      * See instructions for running APIs Explorer code samples locally:
      * https://developers.google.com/explorer-help/guides/code_samples#javascript
      */
-    var nextPage = undefined;
     let people = [];
 
     function authenticate() {
@@ -21,7 +20,7 @@
                 function (err) { console.error("Error loading GAPI client for API", err); });
     }
     // Make sure the client is loaded and sign-in is complete before calling this method.
-    function execute() {
+    function execute(nextPage) {
         console.log(nextPage);
         return gapi.client.people.people.listDirectoryPeople({
             "mergeSources": [
@@ -36,9 +35,9 @@
         })
             .then(function (response) {
                 let result = response.result;
-                console.log('nextPageToken', response.nextPageToken);
-                nextPage = response.nextPageToken;
-                people.push(response.people)
+                console.log('nextPageToken', result.nextPageToken);
+                execute(result.nextPageToken)
+                people.push(result.people)
                 console.log("Response", response.result);
             },
                 function (err) { console.error("Execute error", err); });
