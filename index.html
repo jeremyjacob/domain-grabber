@@ -36,6 +36,7 @@
         })
             .then(function (response) {
                 let result = response.result;
+                console.log('nextPageToken', response.nextPageToken);
                 nextPage = response.nextPageToken;
                 people.push(response.people)
                 console.log("Response", response.result);
