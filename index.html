@@ -35,11 +35,8 @@
         })
             .then(function (response) {
                 let result = response.result;
-                console.log('nextPageToken', result.nextPageToken);
-                if (result.nextPageToken == undefined) {
-                    return;
-                }
                 execute(result.nextPageToken)
+                if (result.nextPageToken == undefined) { return; }
                 people.push(result.people)
                 console.log("Response", response.result);
             },
