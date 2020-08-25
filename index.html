@@ -40,7 +40,9 @@
                     let peopleOutput = [];
 
                     people.forEach(person => {
-                        peopleOutput.push([person.emailAddresses[0].value, person.names[0].unstructuredName]);
+                        if (person.emailAddresses.length && person.names.length) {
+                            peopleOutput.push([person.emailAddresses[0].value, person.names[0].unstructuredName]);
+                        }
                     });
                     
                     let csvContent = "data:text/csv;charset=utf-8," + peopleOutput.map(e => e.join(",")).join("\n");
